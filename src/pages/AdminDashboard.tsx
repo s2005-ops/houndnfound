@@ -316,9 +316,14 @@ const AdminDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        {showTeacherManagement && isSuperAdmin ? (
-          <TeacherManagement onClose={() => setShowTeacherManagement(false)} />
-        ) : (
+        {/* Teacher Management Section - Show for Super Admins */}
+        {isSuperAdmin && showTeacherManagement && (
+          <div className="mb-8">
+            <TeacherManagement onClose={() => setShowTeacherManagement(false)} />
+          </div>
+        )}
+        
+        {!showTeacherManagement && (
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
