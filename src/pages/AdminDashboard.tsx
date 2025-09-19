@@ -10,14 +10,16 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { AddItemDialog } from '@/components/AddItemDialog';
 import { StatsChart } from '@/components/StatsChart';
-import { Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home } from 'lucide-react';
+import { TeacherManagement } from '@/components/TeacherManagement';
+import { Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home, Users, Settings } from 'lucide-react';
 import { format } from 'date-fns';
 
 const AdminDashboard = () => {
-  const { teacher, logout } = useAuth();
+  const { teacher, logout, isSuperAdmin } = useAuth();
   const [items, setItems] = useState<LostItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [showTeacherManagement, setShowTeacherManagement] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -141,10 +143,23 @@ const AdminDashboard = () => {
       <header className="bg-primary text-primary-foreground py-4 px-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold">Lost & Found Admin</h1>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              Lost & Found Admin
+              {isSuperAdmin && <Badge variant="secondary" className="ml-2">Super Admin</Badge>}
+            </h1>
             <p className="text-primary-foreground/80">Welcome back, {teacher?.full_name}</p>
           </div>
           <div className="flex gap-3">
+            {isSuperAdmin && (
+              <Button 
+                variant="outline" 
+                onClick={() => setShowTeacherManagement(!showTeacherManagement)}
+                className="text-primary bg-primary-foreground"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Manage Teachers
+              </Button>
+            )}
             <Link to="/">
               <Button variant="outline" className="text-primary bg-primary-foreground">
                 <Home className="h-4 w-4 mr-2" />
@@ -160,7 +175,11 @@ const AdminDashboard = () => {
       </header>
 
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {showTeacherManagement && isSuperAdmin ? (
+          <TeacherManagement onClose={() => setShowTeacherManagement(false)} />
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Available Items</CardTitle>
@@ -259,6 +278,8 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
+          </>
+        )}
       </div>
 
       <AddItemDialog 

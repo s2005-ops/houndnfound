@@ -63,6 +63,7 @@ export type Database = {
       }
       teachers: {
         Row: {
+          access_level: string
           created_at: string
           email: string | null
           full_name: string
@@ -72,6 +73,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          access_level?: string
           created_at?: string
           email?: string | null
           full_name: string
@@ -81,6 +83,7 @@ export type Database = {
           username: string
         }
         Update: {
+          access_level?: string
           created_at?: string
           email?: string | null
           full_name?: string
@@ -99,6 +102,10 @@ export type Database = {
       auto_archive_old_items: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      is_super_admin: {
+        Args: { teacher_id: string }
+        Returns: boolean
       }
     }
     Enums: {

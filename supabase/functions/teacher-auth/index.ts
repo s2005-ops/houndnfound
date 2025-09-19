@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { action, username, password } = await req.json()
+    const { action, username, password, fullName, email } = await req.json()
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -51,6 +51,49 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ teacher: teacherData }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (action === 'signup') {
+      // Check if username already exists
+      const { data: existingTeacher } = await supabase
+        .from('teachers')
+        .select('id')
+        .eq('username', username)
+        .single()
+
+      if (existingTeacher) {
+        return new Response(
+          JSON.stringify({ error: 'Username already exists' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Hash password
+      const passwordHash = await bcrypt.hash(password, 10)
+
+      // Create new teacher
+      const { error } = await supabase
+        .from('teachers')
+        .insert({
+          username,
+          password_hash: passwordHash,
+          full_name: fullName,
+          email: email || null,
+          access_level: 'admin' // Default to admin level
+        })
+
+      if (error) {
+        console.error('Error creating teacher:', error)
+        return new Response(
+          JSON.stringify({ error: 'Failed to create account' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
