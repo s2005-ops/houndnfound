@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
+import { hash, compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +37,7 @@ serve(async (req) => {
       }
 
       // Verify password
-      const isValidPassword = await bcrypt.compare(password, teacher.password_hash)
+      const isValidPassword = await compare(password, teacher.password_hash)
       
       if (!isValidPassword) {
         return new Response(
@@ -71,7 +71,7 @@ serve(async (req) => {
       }
 
       // Hash password
-      const passwordHash = await bcrypt.hash(password, 10)
+      const passwordHash = await hash(password)
 
       // Create new teacher
       const { error } = await supabase
