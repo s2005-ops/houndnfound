@@ -45,7 +45,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onClose })
     }
   };
 
-  const updateAccessLevel = async (teacherId: string, newAccessLevel: 'admin' | 'super_admin') => {
+  const updateAccessLevel = async (teacherId: string, newAccessLevel: 'user' | 'admin' | 'super_admin') => {
     try {
       const { error } = await supabase
         .from('teachers')
@@ -146,8 +146,10 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onClose })
                   <CardTitle className="flex items-center gap-2">
                     {teacher.access_level === 'super_admin' ? (
                       <Crown className="h-4 w-4 text-yellow-500" />
-                    ) : (
+                    ) : teacher.access_level === 'admin' ? (
                       <Shield className="h-4 w-4 text-blue-500" />
+                    ) : (
+                      <Users className="h-4 w-4 text-gray-500" />
                     )}
                     {teacher.full_name}
                   </CardTitle>
@@ -156,7 +158,10 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onClose })
                     <CardDescription>{teacher.email}</CardDescription>
                   )}
                 </div>
-                <Badge variant={teacher.access_level === 'super_admin' ? 'default' : 'secondary'}>
+                <Badge variant={
+                  teacher.access_level === 'super_admin' ? 'default' : 
+                  teacher.access_level === 'admin' ? 'secondary' : 'outline'
+                }>
                   {teacher.access_level.replace('_', ' ')}
                 </Badge>
               </div>
@@ -170,7 +175,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onClose })
                   <div className="flex gap-2">
                     <Select
                       value={teacher.access_level}
-                      onValueChange={(value: 'admin' | 'super_admin') => 
+                      onValueChange={(value: 'user' | 'admin' | 'super_admin') => 
                         updateAccessLevel(teacher.id, value)
                       }
                     >
@@ -178,6 +183,7 @@ export const TeacherManagement: React.FC<TeacherManagementProps> = ({ onClose })
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
                       </SelectContent>
