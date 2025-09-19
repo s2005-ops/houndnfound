@@ -94,7 +94,7 @@ serve(async (req) => {
           password_hash: passwordHash,
           full_name: fullName,
           email: email,
-          access_level: 'admin' // Default to admin level
+          access_level: 'user' // Default to user level
         })
 
       if (error) {
