@@ -25,7 +25,7 @@ const Navbar = () => {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold">Hound &amp; Found</h1>
-              <p className="text-xs text-muted-foreground -mt-1">School Portal</p>
+              <p className="text-xs text-muted-foreground -mt-1">Found &amp; Lost Portal</p>
             </div>
           </Link>
 
