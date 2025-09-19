@@ -68,32 +68,6 @@ const Index = () => {
           </Card>
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="bg-card rounded-lg p-8 max-w-3xl mx-auto">
-            <TrendingUp className="h-12 w-12 mx-auto text-primary mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Unique Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-              <div>
-                <h3 className="font-semibold mb-2">Smart Search</h3>
-                <p className="text-muted-foreground text-sm">
-                  Filter items by date, description, or location for quick discovery
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Analytics Dashboard</h3>
-                <p className="text-muted-foreground text-sm">
-                  Monthly statistics and trends to track lost item patterns
-                </p>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Auto-Archive</h3>
-                <p className="text-muted-foreground text-sm">
-                  Items automatically archived after 30 days to keep the system organized
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
