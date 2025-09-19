@@ -1,10 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
-import { hash, compare } from "https://deno.land/x/bcrypt@v0.4.1/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+// Simple password hashing using Web Crypto API
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(password + 'salt') // Simple salt
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  const hashedInput = await hashPassword(password)
+  return hashedInput === hash
 }
 
 serve(async (req) => {
@@ -37,7 +50,7 @@ serve(async (req) => {
       }
 
       // Verify password
-      const isValidPassword = await compare(password, teacher.password_hash)
+      const isValidPassword = await verifyPassword(password, teacher.password_hash)
       
       if (!isValidPassword) {
         return new Response(
@@ -61,7 +74,7 @@ serve(async (req) => {
         .from('teachers')
         .select('id')
         .eq('email', email)
-        .single()
+        .maybeSingle()
 
       if (existingTeacher) {
         return new Response(
@@ -71,7 +84,7 @@ serve(async (req) => {
       }
 
       // Hash password
-      const passwordHash = await hash(password)
+      const passwordHash = await hashPassword(password)
 
       // Create new teacher
       const { error } = await supabase
@@ -87,8 +100,11 @@ serve(async (req) => {
       if (error) {
         console.error('Error creating teacher:', error)
         return new Response(
-          JSON.stringify({ error: 'Failed to create account' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ error: 'Failed to create account: ' + error.message }),
+          { 
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
         )
       }
 
@@ -109,7 +125,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in teacher-auth function:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error: ' + error.message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
