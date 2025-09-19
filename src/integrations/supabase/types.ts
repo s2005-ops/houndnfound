@@ -14,13 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lost_items: {
+        Row: {
+          collected_at: string | null
+          collection_location: string
+          created_at: string
+          description: string
+          id: string
+          image_url: string | null
+          location_found: string
+          status: string
+          teacher_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          collected_at?: string | null
+          collection_location: string
+          created_at?: string
+          description: string
+          id?: string
+          image_url?: string | null
+          location_found: string
+          status?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          collected_at?: string | null
+          collection_location?: string
+          created_at?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          location_found?: string
+          status?: string
+          teacher_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_items_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teachers: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          password_hash: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          password_hash: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          password_hash?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      auto_archive_old_items: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
