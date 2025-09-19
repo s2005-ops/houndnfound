@@ -5,17 +5,18 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
 import { BookOpen, Shield, LogIn, User, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+
 const Navbar = () => {
-  const {
-    teacher,
-    logout
-  } = useAuth();
+  const { teacher, logout } = useAuth();
   const navigate = useNavigate();
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
-  return <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border/50 shadow-sm">
+
+  return (
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border/50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -24,7 +25,7 @@ const Navbar = () => {
               <BookOpen className="h-6 w-6 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold">Hound & Found</h1>
+              <h1 className="text-xl font-bold">Lost & Found</h1>
               <p className="text-xs text-muted-foreground -mt-1">School Portal</p>
             </div>
           </Link>
@@ -37,7 +38,8 @@ const Navbar = () => {
               </Button>
             </Link>
             
-            {teacher ? <DropdownMenu>
+            {teacher ? (
+              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="flex items-center gap-2">
                     <Avatar className="h-6 w-6">
@@ -61,15 +63,20 @@ const Navbar = () => {
                     Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu> : <Link to="/login">
+              </DropdownMenu>
+            ) : (
+              <Link to="/login">
                 <Button variant="outline" size="sm" className="shadow-soft">
                   <Shield className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Teacher</span> Login
                 </Button>
-              </Link>}
+              </Link>
+            )}
           </div>
         </div>
       </div>
-    </nav>;
+    </nav>
+  );
 };
+
 export default Navbar;

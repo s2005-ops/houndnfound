@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Upload, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 interface EditItemDialogProps {
   open: boolean;
@@ -28,8 +28,6 @@ interface FormData {
 
 export const EditItemDialog = ({ open, onOpenChange, item, onItemUpdated }: EditItemDialogProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedImage, setUploadedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(item.image_url || null);
   
   const form = useForm<FormData>({
     defaultValues: {
@@ -41,47 +39,10 @@ export const EditItemDialog = ({ open, onOpenChange, item, onItemUpdated }: Edit
     }
   });
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedImage(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const removeImage = () => {
-    setUploadedImage(null);
-    setImagePreview(null);
-  };
-
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     
     try {
-      let imageUrl = item.image_url;
-
-      // Upload new image if one was selected
-      if (uploadedImage) {
-        const fileName = `${Date.now()}-${uploadedImage.name}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('lost-items')
-          .upload(fileName, uploadedImage);
-
-        if (uploadError) {
-          throw uploadError;
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('lost-items')
-          .getPublicUrl(fileName);
-
-        imageUrl = publicUrl;
-      }
-
       const updateData: any = {
         description: data.description,
         location_found: data.location_found,
@@ -90,8 +51,8 @@ export const EditItemDialog = ({ open, onOpenChange, item, onItemUpdated }: Edit
         updated_at: new Date().toISOString()
       };
 
-      if (imageUrl) {
-        updateData.image_url = imageUrl;
+      if (data.image_url) {
+        updateData.image_url = data.image_url;
       }
 
       // If marking as collected, add collected_at timestamp
@@ -216,38 +177,22 @@ export const EditItemDialog = ({ open, onOpenChange, item, onItemUpdated }: Edit
               )}
             />
 
-            <div className="space-y-2">
-              <FormLabel>Image (optional)</FormLabel>
-              {imagePreview ? (
-                <div className="relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Preview" 
-                    className="w-full max-w-xs h-32 object-cover rounded-md border"
-                  />
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-1 right-1 h-6 w-6"
-                    onClick={removeImage}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                  <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Upload an image</p>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="max-w-xs"
-                  />
-                </div>
+            <FormField
+              control={form.control}
+              name="image_url"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (optional)</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <DialogFooter>
               <Button 

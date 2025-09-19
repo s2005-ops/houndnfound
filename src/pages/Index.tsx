@@ -10,25 +10,30 @@ import { Label } from '@/components/ui/label';
 import Navbar from '@/components/Navbar';
 import { Search, User, BookOpen, Sparkles, Shield, BarChart3, Archive, Clock, MapPin, Calendar, Filter, Grid, List, Star } from 'lucide-react';
 import { format } from 'date-fns';
+
 const Index = () => {
   const [items, setItems] = useState<LostItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<LostItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetchItems();
   }, []);
+
   useEffect(() => {
     filterItems();
   }, [items, searchTerm]);
+
   const fetchItems = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('lost_items').select('*').eq('status', 'available').order('created_at', {
-        ascending: false
-      }).limit(6);
+      const { data, error } = await supabase
+        .from('lost_items')
+        .select('*')
+        .eq('status', 'available')
+        .order('created_at', { ascending: false })
+        .limit(6);
+
       if (error) throw error;
       setItems(data || []);
     } catch (error) {
@@ -37,25 +42,36 @@ const Index = () => {
       setLoading(false);
     }
   };
+
   const filterItems = () => {
     let filtered = items;
     if (searchTerm) {
-      filtered = filtered.filter(item => item.description.toLowerCase().includes(searchTerm.toLowerCase()) || item.location_found.toLowerCase().includes(searchTerm.toLowerCase()) || item.collection_location.toLowerCase().includes(searchTerm.toLowerCase()));
+      filtered = filtered.filter(item =>
+        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.location_found.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.collection_location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
     setFilteredItems(filtered);
   };
-  const ItemCard = ({
-    item
-  }: {
-    item: LostItem;
-  }) => <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-1 bg-white/80 backdrop-blur-sm">
+
+  const ItemCard = ({ item }: { item: LostItem }) => (
+    <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-1 bg-white/80 backdrop-blur-sm">
       <div className="relative">
-        {item.image_url && <div className="aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-            <img src={item.image_url} alt={item.description} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          </div>}
-        {!item.image_url && <div className="aspect-video w-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+        {item.image_url && (
+          <div className="aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+            <img
+              src={item.image_url}
+              alt={item.description}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        )}
+        {!item.image_url && (
+          <div className="aspect-video w-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
             <Search className="h-8 w-8 text-muted-foreground" />
-          </div>}
+          </div>
+        )}
         
         <div className="absolute top-3 right-3">
           <Badge className="bg-green-100 text-green-800 border-green-200 font-medium">
@@ -93,8 +109,11 @@ const Index = () => {
           </div>
         </div>
       </CardContent>
-    </Card>;
-  return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <Navbar />
       
       {/* Hero Section */}
@@ -109,7 +128,9 @@ const Index = () => {
               </div>
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">Hound & Found Portal</h1>
+            <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+              Lost & Found Portal
+            </h1>
             
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
               A modern, intelligent system designed to reunite students with their belongings quickly and efficiently
@@ -148,35 +169,50 @@ const Index = () => {
               <CardContent className="p-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search by description, location..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 border-0 shadow-soft bg-white/50" />
+                  <Input
+                    placeholder="Search by description, location..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-0 shadow-soft bg-white/50"
+                  />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {loading ? <div className="text-center py-12">
+          {loading ? (
+            <div className="text-center py-12">
               <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-muted-foreground">Loading found items...</p>
-            </div> : <>
+            </div>
+          ) : (
+            <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                {filteredItems.map(item => <ItemCard key={item.id} item={item} />)}
+                {filteredItems.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
               </div>
 
-              {filteredItems.length === 0 && <Card className="text-center py-12 border-0 shadow-soft bg-white/80 backdrop-blur-sm">
+              {filteredItems.length === 0 && (
+                <Card className="text-center py-12 border-0 shadow-soft bg-white/80 backdrop-blur-sm">
                   <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No items found</h3>
                   <p className="text-muted-foreground">Try adjusting your search or check back later</p>
-                </Card>}
+                </Card>
+              )}
 
-              {filteredItems.length > 0 && <div className="text-center">
+              {filteredItems.length > 0 && (
+                <div className="text-center">
                   <Link to="/student">
                     <Button size="lg" className="shadow-lg">
                       <Search className="h-5 w-5 mr-2" />
                       View All Items
                     </Button>
                   </Link>
-                </div>}
-            </>}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </section>
 
@@ -309,6 +345,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
