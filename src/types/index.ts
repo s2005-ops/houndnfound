@@ -16,7 +16,7 @@ export interface Teacher {
   username: string;
   full_name: string;
   email?: string;
-  access_level: 'super_admin' | 'admin' | 'user';
+  access_level: 'super_admin' | 'admin';
   created_at: string;
   updated_at: string;
 }
