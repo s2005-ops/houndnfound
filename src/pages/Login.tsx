@@ -84,18 +84,18 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/20 p-4">
-      <div className="w-full max-w-md relative">
-        <div className="absolute top-0 left-0 -mt-16">
-          <Link to="/">
-            <Button variant="outline" className="flex items-center gap-2">
-              <Home className="h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-        
-        <Card className="w-full">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-secondary/20">
+      <div className="absolute top-4 left-4 z-10">
+        <Link to="/">
+          <Button variant="outline" className="flex items-center gap-2 bg-background/80 backdrop-blur-sm">
+            <Home className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </Link>
+      </div>
+      
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <BookOpen className="h-12 w-12 text-primary" />
