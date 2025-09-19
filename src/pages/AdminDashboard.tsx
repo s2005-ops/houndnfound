@@ -7,11 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { AddItemDialog } from '@/components/AddItemDialog';
 import { StatsChart } from '@/components/StatsChart';
 import { TeacherManagement } from '@/components/TeacherManagement';
-import { Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home, Users, Settings } from 'lucide-react';
+import { 
+  Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home, Users, 
+  Settings, BarChart3, Star, Clock, MapPin, Filter, Grid, Eye 
+} from 'lucide-react';
 import { format } from 'date-fns';
 
 const AdminDashboard = () => {
@@ -33,7 +37,7 @@ const AdminDashboard = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setItems(data || []);
+      setItems((data || []) as LostItem[]);
     } catch (error) {
       console.error('Error fetching items:', error);
       toast({
@@ -82,94 +86,151 @@ const AdminDashboard = () => {
     return items.filter(item => item.status === status);
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'available': return 'bg-green-100 text-green-800 border-green-200';
+      case 'collected': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'archived': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   const ItemCard = ({ item }: { item: LostItem }) => (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-lg">{item.description}</CardTitle>
-          <Badge variant={item.status === 'available' ? 'default' : 
-                        item.status === 'collected' ? 'secondary' : 'outline'}>
-            {item.status}
-          </Badge>
-        </div>
-        <CardDescription>
-          Added on {format(new Date(item.created_at), 'PPP')}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
+    <Card className="group overflow-hidden border-0 shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-1 bg-white/80 backdrop-blur-sm">
+      <div className="relative">
         {item.image_url && (
-          <div className="w-full h-32 bg-muted rounded-lg overflow-hidden">
+          <div className="aspect-video w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
             <img
               src={item.image_url}
               alt={item.description}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </div>
         )}
-        <div className="space-y-2 text-sm">
-          <p><strong>Found at:</strong> {item.location_found}</p>
-          <p><strong>Collect from:</strong> {item.collection_location}</p>
+        {!item.image_url && (
+          <div className="aspect-video w-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+            <Package className="h-8 w-8 text-muted-foreground" />
+          </div>
+        )}
+        
+        <div className="absolute top-3 right-3">
+          <Badge className={`${getStatusColor(item.status)} font-medium`}>
+            {item.status}
+          </Badge>
+        </div>
+      </div>
+
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+          {item.description}
+        </CardTitle>
+        <CardDescription className="flex items-center gap-2">
+          <Clock className="h-4 w-4" />
+          Added {format(new Date(item.created_at), 'MMM dd, yyyy')}
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <MapPin className="h-4 w-4 mt-1 text-primary flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">Found at:</p>
+              <p className="text-sm text-muted-foreground">{item.location_found}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-3">
+            <Settings className="h-4 w-4 mt-1 text-primary flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium">Collect from:</p>
+              <p className="text-sm text-muted-foreground">{item.collection_location}</p>
+            </div>
+          </div>
+
           {item.collected_at && (
-            <p><strong>Collected on:</strong> {format(new Date(item.collected_at), 'PPP')}</p>
+            <div className="pt-2 border-t">
+              <Badge variant="secondary" className="text-xs">
+                Collected on {format(new Date(item.collected_at), 'PPP')}
+              </Badge>
+            </div>
+          )}
+
+          {item.status === 'available' && (
+            <div className="pt-3">
+              <Button 
+                onClick={() => markAsCollected(item.id)}
+                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+                size="sm"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Mark as Collected
+              </Button>
+            </div>
           )}
         </div>
-        {item.status === 'available' && (
-          <Button 
-            onClick={() => markAsCollected(item.id)}
-            className="w-full"
-            size="sm"
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Mark as Collected
-          </Button>
-        )}
       </CardContent>
     </Card>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading dashboard...</p>
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground py-4 px-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              Lost & Found Admin
-              {isSuperAdmin && <Badge variant="secondary" className="ml-2">Super Admin</Badge>}
-            </h1>
-            <p className="text-primary-foreground/80">Welcome back, {teacher?.full_name}</p>
-          </div>
-          <div className="flex gap-3">
-            {isSuperAdmin && (
-              <Button 
-                variant="outline" 
-                onClick={() => setShowTeacherManagement(!showTeacherManagement)}
-                className="text-primary bg-primary-foreground"
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Manage Teachers
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border/50 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+                <Settings className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                  {isSuperAdmin && (
+                    <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0">
+                      Super Admin
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">Welcome back, {teacher?.full_name}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {isSuperAdmin && (
+                <Button 
+                  variant={showTeacherManagement ? "default" : "outline"}
+                  onClick={() => setShowTeacherManagement(!showTeacherManagement)}
+                  className="shadow-soft"
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  {showTeacherManagement ? 'Hide' : 'Manage'} Teachers
+                </Button>
+              )}
+              
+              <Link to="/">
+                <Button variant="outline" className="shadow-soft">
+                  <Home className="h-4 w-4 mr-2" />
+                  Home
+                </Button>
+              </Link>
+              
+              <Button variant="outline" onClick={logout} className="shadow-soft text-red-600 hover:bg-red-50 hover:border-red-200">
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
-            )}
-            <Link to="/">
-              <Button variant="outline" className="text-primary bg-primary-foreground">
-                <Home className="h-4 w-4 mr-2" />
-                Home
-              </Button>
-            </Link>
-            <Button variant="outline" onClick={logout} className="text-primary bg-primary-foreground">
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -179,105 +240,154 @@ const AdminDashboard = () => {
           <TeacherManagement onClose={() => setShowTeacherManagement(false)} />
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available Items</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{getItemsByStatus('available').length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Collected</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{getItemsByStatus('collected').length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Archived</CardTitle>
-              <Archive className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{getItemsByStatus('archived').length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{items.length}</div>
-            </CardContent>
-          </Card>
-        </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <Card className="border-0 shadow-soft bg-white/80 backdrop-blur-sm overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                  <CardTitle className="text-sm font-medium">Available Items</CardTitle>
+                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <Star className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className="text-2xl font-bold">{getItemsByStatus('available').length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Ready for pickup</p>
+                </CardContent>
+              </Card>
 
-        <div className="mb-6">
-          <StatsChart items={items} />
-        </div>
+              <Card className="border-0 shadow-soft bg-white/80 backdrop-blur-sm overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-blue-600/5"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                  <CardTitle className="text-sm font-medium">Collected</CardTitle>
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className="text-2xl font-bold">{getItemsByStatus('collected').length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Successfully returned</p>
+                </CardContent>
+              </Card>
 
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Manage Items</h2>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Lost Item
-          </Button>
-        </div>
+              <Card className="border-0 shadow-soft bg-white/80 backdrop-blur-sm overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-500/5 to-gray-600/5"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                  <CardTitle className="text-sm font-medium">Archived</CardTitle>
+                  <div className="w-8 h-8 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center">
+                    <Archive className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className="text-2xl font-bold">{getItemsByStatus('archived').length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">Auto-archived</p>
+                </CardContent>
+              </Card>
 
-        <Tabs defaultValue="available" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="available">
-              Available ({getItemsByStatus('available').length})
-            </TabsTrigger>
-            <TabsTrigger value="collected">
-              Collected ({getItemsByStatus('collected').length})
-            </TabsTrigger>
-            <TabsTrigger value="archived">
-              Archived ({getItemsByStatus('archived').length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="available" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getItemsByStatus('available').map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
+              <Card className="border-0 shadow-soft bg-white/80 backdrop-blur-sm overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-purple-600/5"></div>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative">
+                  <CardTitle className="text-sm font-medium">Total Items</CardTitle>
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-white" />
+                  </div>
+                </CardHeader>
+                <CardContent className="relative">
+                  <div className="text-2xl font-bold">{items.length}</div>
+                  <p className="text-xs text-muted-foreground mt-1">All time</p>
+                </CardContent>
+              </Card>
             </div>
-            {getItemsByStatus('available').length === 0 && (
-              <div className="text-center py-12">
-                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium">No available items</h3>
-                <p className="text-muted-foreground mb-4">Start by adding a lost item</p>
-                <Button onClick={() => setIsAddDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Item
-                </Button>
+
+            {/* Statistics Chart */}
+            <div className="mb-8">
+              <StatsChart items={items} />
+            </div>
+
+            {/* Add Item Section */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Manage Lost Items</h2>
+                <p className="text-muted-foreground">Add new items and track their status</p>
               </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="collected" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getItemsByStatus('collected').map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
+              <Button 
+                onClick={() => setIsAddDialogOpen(true)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-glow"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Lost Item
+              </Button>
             </div>
-          </TabsContent>
 
-          <TabsContent value="archived" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {getItemsByStatus('archived').map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
+            {/* Items Tabs */}
+            <Tabs defaultValue="available" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm shadow-soft border-0">
+                <TabsTrigger value="available" className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Available ({getItemsByStatus('available').length})
+                </TabsTrigger>
+                <TabsTrigger value="collected" className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Collected ({getItemsByStatus('collected').length})
+                </TabsTrigger>
+                <TabsTrigger value="archived" className="flex items-center gap-2">
+                  <Archive className="h-4 w-4" />
+                  Archived ({getItemsByStatus('archived').length})
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="available" className="mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {getItemsByStatus('available').map((item) => (
+                    <ItemCard key={item.id} item={item} />
+                  ))}
+                </div>
+                {getItemsByStatus('available').length === 0 && (
+                  <Card className="text-center py-12 border-0 shadow-soft bg-white/80 backdrop-blur-sm">
+                    <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No available items</h3>
+                    <p className="text-muted-foreground mb-4">Start by adding a lost item</p>
+                    <Button 
+                      onClick={() => setIsAddDialogOpen(true)}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add First Item
+                    </Button>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="collected" className="mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {getItemsByStatus('collected').map((item) => (
+                    <ItemCard key={item.id} item={item} />
+                  ))}
+                </div>
+                {getItemsByStatus('collected').length === 0 && (
+                  <Card className="text-center py-12 border-0 shadow-soft bg-white/80 backdrop-blur-sm">
+                    <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No collected items</h3>
+                    <p className="text-muted-foreground">Items marked as collected will appear here</p>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="archived" className="mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {getItemsByStatus('archived').map((item) => (
+                    <ItemCard key={item.id} item={item} />
+                  ))}
+                </div>
+                {getItemsByStatus('archived').length === 0 && (
+                  <Card className="text-center py-12 border-0 shadow-soft bg-white/80 backdrop-blur-sm">
+                    <Archive className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">No archived items</h3>
+                    <p className="text-muted-foreground">Items older than 1 month are automatically archived</p>
+                  </Card>
+                )}
+              </TabsContent>
+            </Tabs>
           </>
         )}
       </div>
@@ -287,7 +397,7 @@ const AdminDashboard = () => {
         onOpenChange={setIsAddDialogOpen}
         onItemAdded={(newItem) => {
           setItems([newItem, ...items]);
-          fetchItems(); // Refresh to get the latest data
+          fetchItems();
         }}
       />
     </div>
