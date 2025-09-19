@@ -11,8 +11,8 @@ interface Teacher {
 
 interface AuthContextType {
   teacher: Teacher | null;
-  login: (username: string, password: string) => Promise<{ error?: string }>;
-  signup: (username: string, password: string, fullName: string, email?: string) => Promise<{ error?: string }>;
+  login: (email: string, password: string) => Promise<{ error?: string }>;
+  signup: (email: string, password: string, fullName: string) => Promise<{ error?: string }>;
   logout: () => void;
   loading: boolean;
   isSuperAdmin: boolean;
@@ -42,10 +42,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = async (username: string, password: string) => {
+  const login = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('teacher-auth', {
-        body: { action: 'login', username, password }
+        body: { action: 'login', email, password }
       });
 
       if (error) throw error;
@@ -67,10 +67,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const signup = async (username: string, password: string, fullName: string, email?: string) => {
+  const signup = async (email: string, password: string, fullName: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('teacher-auth', {
-        body: { action: 'signup', username, password, fullName, email }
+        body: { action: 'signup', email, password, fullName }
       });
 
       if (error) throw error;

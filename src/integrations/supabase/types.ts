@@ -65,7 +65,7 @@ export type Database = {
         Row: {
           access_level: string
           created_at: string
-          email: string | null
+          email: string
           full_name: string
           id: string
           password_hash: string
@@ -75,7 +75,7 @@ export type Database = {
         Insert: {
           access_level?: string
           created_at?: string
-          email?: string | null
+          email: string
           full_name: string
           id?: string
           password_hash: string
@@ -85,7 +85,7 @@ export type Database = {
         Update: {
           access_level?: string
           created_at?: string
-          email?: string | null
+          email?: string
           full_name?: string
           id?: string
           password_hash?: string

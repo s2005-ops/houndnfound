@@ -10,10 +10,9 @@ import { toast } from '@/hooks/use-toast';
 import { Loader2, BookOpen, Home } from 'lucide-react';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const { login, signup } = useAuth();
@@ -21,7 +20,7 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) {
+    if (!email || !password) {
       toast({
         title: "Error",
         description: "Please fill in all fields",
@@ -31,7 +30,7 @@ const Login = () => {
     }
 
     setLoading(true);
-    const { error } = await login(username, password);
+    const { error } = await login(email, password);
     
     if (error) {
       toast({
@@ -51,7 +50,7 @@ const Login = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password || !fullName) {
+    if (!email || !password || !fullName) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -61,7 +60,7 @@ const Login = () => {
     }
 
     setLoading(true);
-    const { error } = await signup(username, password, fullName, email);
+    const { error } = await signup(email, password, fullName);
     
     if (error) {
       toast({
@@ -75,10 +74,9 @@ const Login = () => {
         description: "Account created successfully. Please login."
       });
       setIsLogin(true);
-      setUsername('');
+      setEmail('');
       setPassword('');
       setFullName('');
-      setEmail('');
     }
     setLoading(false);
   };
@@ -115,13 +113,13 @@ const Login = () => {
             <TabsContent value="login">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-username">Username</Label>
+                  <Label htmlFor="login-email">Email</Label>
                   <Input
-                    id="login-username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
+                    id="login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
                     disabled={loading}
                   />
                 </div>
@@ -143,13 +141,25 @@ const Login = () => {
               </form>
               <div className="mt-4 p-3 bg-muted rounded-lg text-sm">
                 <p className="font-medium">Demo Credentials:</p>
-                <p>Username: <code>admin</code></p>
+                <p>Email: <code>admin@school.edu</code></p>
                 <p>Password: <code>admin123</code></p>
               </div>
             </TabsContent>
             
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email *</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    disabled={loading}
+                    required
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-fullname">Full Name *</Label>
                   <Input
@@ -160,29 +170,6 @@ const Login = () => {
                     placeholder="Enter your full name"
                     disabled={loading}
                     required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-username">Username *</Label>
-                  <Input
-                    id="signup-username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Choose a username"
-                    disabled={loading}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email (optional)"
-                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
