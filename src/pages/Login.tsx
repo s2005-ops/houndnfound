@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, BookOpen } from 'lucide-react';
+import { Loader2, BookOpen, Home } from 'lucide-react';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -85,16 +85,26 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/20 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <BookOpen className="h-12 w-12 text-primary" />
-          </div>
-          <CardTitle className="text-2xl">Teacher Portal</CardTitle>
-          <CardDescription>
-            Access the Lost & Found Admin Panel
-          </CardDescription>
-        </CardHeader>
+      <div className="w-full max-w-md relative">
+        <div className="absolute top-0 left-0 -mt-16">
+          <Link to="/">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Home className="h-4 w-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+        
+        <Card className="w-full">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <BookOpen className="h-12 w-12 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Teacher Portal</CardTitle>
+            <CardDescription>
+              Access the Lost & Found Admin Panel
+            </CardDescription>
+          </CardHeader>
         <CardContent>
           <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => setIsLogin(value === "login")}>
             <TabsList className="grid w-full grid-cols-2">
@@ -196,6 +206,7 @@ const Login = () => {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };
