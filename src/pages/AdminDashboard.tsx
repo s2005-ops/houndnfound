@@ -401,7 +401,7 @@ const AdminDashboard = () => {
 
             {/* Items Tabs */}
             <Tabs defaultValue="available" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm shadow-soft border-0">
+              <TabsList className={`grid w-full ${isSuperAdmin ? 'grid-cols-4' : 'grid-cols-3'} bg-white/80 backdrop-blur-sm shadow-soft border-0`}>
                 <TabsTrigger value="available" className="flex items-center gap-2">
                   <Star className="h-4 w-4" />
                   Available ({getItemsByStatus('available').length})
@@ -414,6 +414,12 @@ const AdminDashboard = () => {
                   <Archive className="h-4 w-4" />
                   Archived ({getItemsByStatus('archived').length})
                 </TabsTrigger>
+                {isSuperAdmin && (
+                  <TabsTrigger value="teachers" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Teachers
+                  </TabsTrigger>
+                )}
               </TabsList>
 
               <TabsContent value="available" className="mt-6">
@@ -467,6 +473,12 @@ const AdminDashboard = () => {
                   </Card>
                 )}
               </TabsContent>
+
+              {isSuperAdmin && (
+                <TabsContent value="teachers" className="mt-6">
+                  <TeacherManagement onClose={() => {}} />
+                </TabsContent>
+              )}
             </Tabs>
           </>
         )}
