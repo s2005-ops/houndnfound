@@ -44,7 +44,7 @@ serve(async (req) => {
 
       if (error || !teacher) {
         return new Response(
-          JSON.stringify({ error: 'Invalid email or password' }),
+          JSON.stringify({ error: 'Access denied. Only authorized teachers can login. Please contact an existing teacher or administrator for access.' }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
       }
@@ -68,49 +68,14 @@ serve(async (req) => {
       )
     }
 
+    // Signup is disabled - only existing teachers can login
     if (action === 'signup') {
-      // Check if email already exists
-      const { data: existingTeacher } = await supabase
-        .from('teachers')
-        .select('id')
-        .eq('email', email)
-        .maybeSingle()
-
-      if (existingTeacher) {
-        return new Response(
-          JSON.stringify({ error: 'Email already exists' }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
-
-      // Hash password
-      const passwordHash = await hashPassword(password)
-
-      // Create new teacher
-      const { error } = await supabase
-        .from('teachers')
-        .insert({
-          username: email.split('@')[0], // Generate username from email
-          password_hash: passwordHash,
-          full_name: fullName,
-          email: email,
-          access_level: 'admin' // Default to admin level
-        })
-
-      if (error) {
-        console.error('Error creating teacher:', error)
-        return new Response(
-          JSON.stringify({ error: 'Failed to create account: ' + error.message }),
-          { 
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        )
-      }
-
       return new Response(
-        JSON.stringify({ success: true }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Account creation is disabled. Please contact an existing teacher or administrator to add you to the system.' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
