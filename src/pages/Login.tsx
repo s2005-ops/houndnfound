@@ -15,7 +15,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [isLogin, setIsLogin] = useState(true);
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -48,6 +49,38 @@ const Login = () => {
     setLoading(false);
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password || !fullName) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await signup(email, password, fullName);
+    
+    if (error) {
+      toast({
+        title: "Signup Failed",
+        description: error,
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Account created!",
+        description: "Please login with your new credentials"
+      });
+      setIsLogin(true);
+      setEmail('');
+      setPassword('');
+      setFullName('');
+    }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative">
@@ -87,80 +120,152 @@ const Login = () => {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <div className="space-y-4">{/* Only show login form, no signup tabs */}
+            <Tabs value={isLogin ? "login" : "signup"} onValueChange={(value) => setIsLogin(value === "login")}>
+              <TabsList className="grid w-full grid-cols-2 bg-muted/50">
+                <TabsTrigger value="login" className="data-[state=active]:bg-white data-[state=active]:shadow-soft">
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger value="signup" className="data-[state=active]:bg-white data-[state=active]:shadow-soft">
+                  Sign Up
+                </TabsTrigger>
+              </TabsList>
               
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email" className="text-sm font-medium">Email Address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="login-email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="teacher@school.edu"
-                      className="pl-10 border-0 shadow-soft bg-white/50"
-                      disabled={loading}
-                    />
+              <TabsContent value="login" className="space-y-4 mt-6">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="login-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="teacher@school.edu"
+                        className="pl-10 border-0 shadow-soft bg-white/50"
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="login-password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter your password"
-                      className="pl-10 border-0 shadow-soft bg-white/50"
-                      disabled={loading}
-                    />
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="login-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter your password"
+                        className="pl-10 border-0 shadow-soft bg-white/50"
+                        disabled={loading}
+                      />
+                    </div>
                   </div>
-                </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-glow" 
+                    disabled={loading}
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading ? 'Signing in...' : 'Sign In'}
+                  </Button>
+                </form>
                 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-glow" 
-                  disabled={loading}
-                >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {loading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
-              
-              <Separator className="my-6" />
-              
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Demo Credentials</p>
-                    <div className="space-y-1 text-sm text-muted-foreground">
-                      <p><span className="font-medium">Email:</span> admin@school.edu</p>
-                      <p><span className="font-medium">Password:</span> admin123</p>
+                <Separator className="my-6" />
+                
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">Demo Credentials</p>
+                      <div className="space-y-1 text-sm text-muted-foreground">
+                        <p><span className="font-medium">Email:</span> admin@school.edu</p>
+                        <p><span className="font-medium">Password:</span> admin123</p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </TabsContent>
               
-              <Separator className="my-6" />
-              
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
-                <div className="flex items-start gap-3">
-                  <Shield className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground mb-1">Need Access?</p>
-                    <p className="text-sm text-muted-foreground">
-                      Only authorized teachers can access this system. If you need permission, please contact an existing teacher or administrator to add you to the system.
-                    </p>
+              <TabsContent value="signup" className="space-y-4 mt-6">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm font-medium">Email Address *</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="teacher@school.edu"
+                        className="pl-10 border-0 shadow-soft bg-white/50"
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-fullname" className="text-sm font-medium">Full Name *</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-fullname"
+                        type="text"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="John Smith"
+                        className="pl-10 border-0 shadow-soft bg-white/50"
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-medium">Password *</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Create a secure password"
+                        className="pl-10 border-0 shadow-soft bg-white/50"
+                        disabled={loading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 shadow-glow" 
+                    disabled={loading}
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading ? 'Creating account...' : 'Create Account'}
+                  </Button>
+                </form>
+                
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-100">
+                  <div className="flex items-start gap-3">
+                    <Shield className="h-5 w-5 text-purple-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground mb-1">New Teacher?</p>
+                      <p className="text-sm text-muted-foreground">
+                        Create your account to start managing lost items. You'll be assigned admin privileges automatically.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
