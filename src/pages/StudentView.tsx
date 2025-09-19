@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { LostItem } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Search, Calendar, MapPin, Clock, Archive } from 'lucide-react';
+import { Search, Calendar, MapPin, Clock, Archive, Home } from 'lucide-react';
 import { format } from 'date-fns';
 
 const StudentView = () => {
@@ -132,13 +134,23 @@ const StudentView = () => {
     <div className="min-h-screen bg-background">
       <header className="bg-primary text-primary-foreground py-6">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Search className="h-8 w-8" />
-            Lost & Found Portal
-          </h1>
-          <p className="text-primary-foreground/80 mt-2">
-            Search for your lost items or browse recently found items
-          </p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <Search className="h-8 w-8" />
+                Lost & Found Portal
+              </h1>
+              <p className="text-primary-foreground/80 mt-2">
+                Search for your lost items or browse recently found items
+              </p>
+            </div>
+            <Link to="/">
+              <Button variant="outline" className="text-primary bg-primary-foreground">
+                <Home className="h-4 w-4 mr-2" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 

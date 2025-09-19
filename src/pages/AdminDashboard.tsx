@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { LostItem } from '@/types';
@@ -9,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { AddItemDialog } from '@/components/AddItemDialog';
 import { StatsChart } from '@/components/StatsChart';
-import { Plus, LogOut, Package, CheckCircle, Archive, TrendingUp } from 'lucide-react';
+import { Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home } from 'lucide-react';
 import { format } from 'date-fns';
 
 const AdminDashboard = () => {
@@ -143,10 +144,18 @@ const AdminDashboard = () => {
             <h1 className="text-2xl font-bold">Lost & Found Admin</h1>
             <p className="text-primary-foreground/80">Welcome back, {teacher?.full_name}</p>
           </div>
-          <Button variant="outline" onClick={logout} className="text-primary bg-primary-foreground">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+          <div className="flex gap-3">
+            <Link to="/">
+              <Button variant="outline" className="text-primary bg-primary-foreground">
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={logout} className="text-primary bg-primary-foreground">
+              <LogOut className="h-4 w-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
