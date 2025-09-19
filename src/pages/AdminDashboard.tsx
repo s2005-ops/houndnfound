@@ -10,11 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 import { AddItemDialog } from '@/components/AddItemDialog';
+import { EditItemDialog } from '@/components/EditItemDialog';
 import { StatsChart } from '@/components/StatsChart';
 import { TeacherManagement } from '@/components/TeacherManagement';
 import { 
   Plus, LogOut, Package, CheckCircle, Archive, TrendingUp, Home, Users, 
-  Settings, BarChart3, Star, Clock, MapPin, Filter, Grid, Eye 
+  Settings, BarChart3, Star, Clock, MapPin, Filter, Grid, Eye, Edit3, Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -24,6 +26,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [showTeacherManagement, setShowTeacherManagement] = useState(false);
+  const [editingItem, setEditingItem] = useState<LostItem | null>(null);
 
   useEffect(() => {
     fetchItems();
@@ -82,6 +85,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteItem = async (itemId: string) => {
+    if (!confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('lost_items')
+        .delete()
+        .eq('id', itemId);
+
+      if (error) throw error;
+
+      setItems(items.filter(item => item.id !== itemId));
+
+      toast({
+        title: "Success",
+        description: "Item deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete item",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleItemUpdated = (updatedItem: LostItem) => {
+    setItems(items.map(item => 
+      item.id === updatedItem.id ? updatedItem : item
+    ));
+  };
+
   const getItemsByStatus = (status: string) => {
     return items.filter(item => item.status === status);
   };
@@ -117,6 +155,26 @@ const AdminDashboard = () => {
           <Badge className={`${getStatusColor(item.status)} font-medium`}>
             {item.status}
           </Badge>
+        </div>
+
+        {/* Admin Action Buttons */}
+        <div className="absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+            onClick={() => setEditingItem(item)}
+          >
+            <Edit3 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-8 w-8 p-0 bg-white/80 hover:bg-red-50 hover:text-red-600"
+            onClick={() => deleteItem(item.id)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -157,7 +215,7 @@ const AdminDashboard = () => {
           )}
 
           {item.status === 'available' && (
-            <div className="pt-3">
+            <div className="pt-3 space-y-2">
               <Button 
                 onClick={() => markAsCollected(item.id)}
                 className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
@@ -168,6 +226,28 @@ const AdminDashboard = () => {
               </Button>
             </div>
           )}
+
+          {/* Admin Actions */}
+          <div className="pt-3 border-t flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={() => setEditingItem(item)}
+            >
+              <Edit3 className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-red-600 hover:bg-red-50 hover:border-red-200"
+              onClick={() => deleteItem(item.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -400,6 +480,15 @@ const AdminDashboard = () => {
           fetchItems();
         }}
       />
+
+      {editingItem && (
+        <EditItemDialog
+          open={!!editingItem}
+          onOpenChange={(open) => !open && setEditingItem(null)}
+          item={editingItem}
+          onItemUpdated={handleItemUpdated}
+        />
+      )}
     </div>
   );
 };
