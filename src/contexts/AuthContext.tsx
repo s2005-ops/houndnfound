@@ -6,7 +6,7 @@ interface Teacher {
   username: string;
   full_name: string;
   email?: string;
-  access_level: 'super_admin' | 'admin';
+  access_level: 'super_admin' | 'admin' | 'user';
 }
 
 interface AuthContextType {
